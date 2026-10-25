@@ -153,6 +153,49 @@ export interface Architecture {
   }
 }
 
+export interface TerminalCommand {
+  /** As typed, e.g. "theme" or "cat"; `usage` adds the arguments shown in help. */
+  name: string
+  usage?: string
+  aliases?: string[]
+  description: string
+}
+
+export interface TerminalContent {
+  prompt: string
+  title: string
+  welcome: string
+  inputLabel: string
+  close: string
+  commands: TerminalCommand[]
+  /** "{cmd}" is replaced with what was typed. */
+  notFound: string
+  /** Tappable commands above the input. */
+  chips: string[]
+  cvDownloading: string
+  openUsage: string
+  themeSet: string
+  catBinary: string
+  catMissing: string
+  /** The two easter eggs. */
+  sudoPassword: string
+  sudoGranted: string
+  hireSubject: string
+  hireBody: string
+  rmrf: string
+}
+
+export interface PaletteContent {
+  label: string
+  placeholder: string
+  empty: string
+  groups: { navigate: string; actions: string; links: string }
+  actions: { downloadCv: string; copyEmail: string; openTerminal: string; toggleTheme: string }
+  shortcutMac: string
+  shortcutOther: string
+  open: string
+}
+
 export interface Capability {
   title: string
   description: string
@@ -211,8 +254,6 @@ export interface Profile {
   links: {
     linkedin: Link
     github: Link
-    /** This site's source code. */
-    source: Link
   }
   /** Path under public/. */
   cvPath: string
@@ -226,6 +267,8 @@ export interface Profile {
   photo: Photo
   promptToTask: PromptToTask
   architecture: Architecture
+  terminal: TerminalContent
+  palette: PaletteContent
   awards: Award[]
   education: Education[]
   sections: SectionMeta[]
@@ -235,7 +278,6 @@ export interface Profile {
     downloadCv: string
     contact: string
     openTerminal: string
-    openTerminalSoon: string
     openToWork: string
     yearsShort: string
     orgsShort: string
@@ -253,10 +295,13 @@ export interface Profile {
     copy: string
     copied: string
     copyFailed: string
+    emailCopied: string
+    /** Logged once to the DevTools console; "{email}" is replaced. */
+    devGreeting: string
     contactCommand: string
     emailMe: string
     currentRole: string
-    footerBuiltWith: string
+
   }
 }
 
@@ -392,6 +437,60 @@ const architecture: Architecture = {
   },
 }
 
+const terminal: TerminalContent = {
+  prompt: 'ajay@portfolio:~$',
+  title: 'ajay@portfolio: ~',
+  welcome: "Welcome. Type 'help' to see commands.",
+  inputLabel: 'Terminal command',
+  close: 'Close terminal',
+  commands: [
+    { name: 'help', description: 'list commands' },
+    { name: 'whoami', description: 'name, title and location' },
+    { name: 'about', description: 'a short summary' },
+    { name: 'experience', description: 'roles, dates and durations' },
+    { name: 'skills', usage: '[--json]', description: 'skills by group, or as skills.json' },
+    { name: 'capabilities', aliases: ['projects'], description: 'what I do' },
+    { name: 'awards', description: 'awards and education' },
+    { name: 'contact', description: 'email, LinkedIn, GitHub, location' },
+    { name: 'cv', description: 'download my CV' },
+    { name: 'ls', description: 'list files' },
+    { name: 'cat', usage: '<file>', description: 'print a file, e.g. cat ajay.ts' },
+    { name: 'open', usage: '<section>', aliases: ['cd'], description: 'close the terminal and go to a section' },
+    { name: 'theme', usage: '[dark|light]', description: 'switch or toggle the theme' },
+    { name: 'history', description: 'commands you have run' },
+    { name: 'clear', description: 'clear the screen (Ctrl+L)' },
+    { name: 'exit', description: 'close the terminal (Esc)' },
+  ],
+  notFound: "command not found: {cmd}. Type 'help'.",
+  chips: ['help', 'whoami', 'skills', 'contact', 'cat ajay.ts'],
+  cvDownloading: 'Downloading Ajay_P_CV.pdf…',
+  openUsage: 'usage: open <section>. Sections:',
+  themeSet: 'theme: {theme}',
+  catBinary: 'cat: cv.pdf: binary file. Try `cv`.',
+  catMissing: 'cat: {file}: no such file. Try `ls`.',
+  sudoPassword: '[sudo] password for recruiter: ********',
+  sudoGranted: 'Access granted. Opening email…',
+  hireSubject: "Let's talk about a role",
+  hireBody: 'Hi Ajay,\n\nI came across your portfolio and would like to talk about a role on our team.\n\nBest,\n',
+  rmrf: 'Nice try. This portfolio runs in production.',
+}
+
+const palette: PaletteContent = {
+  label: 'Command palette',
+  placeholder: 'Search sections and actions…',
+  empty: 'No results',
+  groups: { navigate: 'Navigate', actions: 'Actions', links: 'Links' },
+  actions: {
+    downloadCv: 'Download CV',
+    copyEmail: 'Copy email',
+    openTerminal: 'Open terminal',
+    toggleTheme: 'Toggle theme',
+  },
+  shortcutMac: '⌘K',
+  shortcutOther: 'Ctrl K',
+  open: 'Open command palette',
+}
+
 export const profile: Profile = {
   meta: {
     title: 'Ajay P · Technical Lead · Full-Stack Engineer',
@@ -415,7 +514,6 @@ export const profile: Profile = {
   links: {
     linkedin: { label: 'LinkedIn', href: 'https://linkedin.com/in/ajaypofficial' },
     github: { label: 'GitHub', href: 'https://github.com/ajaypaju' },
-    source: { label: 'View source', href: 'https://github.com/ajaypaju/ajaypaju.github.io' },
   },
   cvPath: '/Ajay_P_CV.pdf',
 
@@ -494,10 +592,9 @@ export const profile: Profile = {
     },
     { group: 'Databases', items: ['MySQL', 'MongoDB', 'Redis'] },
     {
-      group: 'Architecture',
-      items: ['Multi-tenant SaaS', 'Caching', 'Webhooks', 'System design'],
+      group: 'Architecture & Security',
+      items: ['Multi-tenant SaaS', 'Caching', 'Webhooks', 'System design', 'OAuth2 SSO', 'RBAC'],
     },
-    { group: 'Auth & Security', items: ['OAuth2 SSO', 'RBAC (Laravel policies and middleware)'] },
   ],
 
   capabilities: [
@@ -532,6 +629,8 @@ export const profile: Profile = {
 
   promptToTask,
   architecture,
+  terminal,
+  palette,
 
   photo: {
     alt: 'Ajay P',
@@ -550,7 +649,7 @@ export const profile: Profile = {
 
   awards: [
     { title: 'Winner, company-wide AI Prompt Engineering Challenge', highlight: true },
-    { title: 'Best R&D Team Performer', year: '2023–2025', note: 'SaaS platform' },
+    { title: 'Best R&D Team Performer', year: '2023–2025' },
     { title: 'Best Programmer Award', year: '2022' },
   ],
 
@@ -624,7 +723,6 @@ export const profile: Profile = {
     downloadCv: 'Download CV',
     contact: 'Contact',
     openTerminal: 'Open Terminal',
-    openTerminalSoon: 'Terminal mode is coming soon',
     openToWork: 'Open to new roles',
     yearsShort: 'yrs',
     orgsShort: 'orgs',
@@ -641,10 +739,12 @@ export const profile: Profile = {
     copy: 'copy',
     copied: 'Copied',
     copyFailed: 'Failed',
+    emailCopied: 'Email copied',
+    devGreeting: 'Hey, fellow developer. Press ` to open the terminal, or ⌘K for commands. Email: {email}',
     contactCommand: 'ajay --contact',
     emailMe: 'Email me',
     currentRole: 'current',
-    footerBuiltWith: 'Built with React, TypeScript and Claude Code',
+
   },
 }
 

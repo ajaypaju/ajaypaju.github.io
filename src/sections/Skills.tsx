@@ -1,47 +1,11 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { CopyButton } from '../components/CopyButton'
 import { Section } from '../components/Section'
 import { profile } from '../data/profile'
+import { skillsJson } from '../lib/files'
+import { HighlightedCode } from '../lib/highlight'
 
 const { ui } = profile
-
-// skills.json is generated from profile.ts, never typed separately.
-const skillsJson = JSON.stringify(
-  Object.fromEntries(profile.skills.map((g) => [g.group, g.items])),
-  null,
-  2,
-)
-
-// Minimal JSON highlighting: keys, strings, punctuation.
-function highlight(line: string, i: number) {
-  const parts: ReactNode[] = []
-  const re = /("(?:[^"\\]|\\.)*")(\s*:)?|([[\]{},])/g
-  let last = 0
-  let k = 0
-  for (const match of line.matchAll(re)) {
-    if (match.index > last) parts.push(line.slice(last, match.index))
-    if (match[1]) {
-      parts.push(
-        <span key={k++} className={match[2] ? 'text-accent-2' : 'text-accent'}>
-          {match[1]}
-        </span>,
-      )
-      if (match[2]) parts.push(<span key={k++} className="text-muted">{match[2]}</span>)
-    } else {
-      parts.push(<span key={k++} className="text-muted">{match[3]}</span>)
-    }
-    last = match.index + match[0].length
-  }
-  parts.push(line.slice(last))
-  return (
-    <div key={i} className="flex">
-      <span aria-hidden="true" className="w-8 shrink-0 select-none pr-3 text-right text-muted/50">
-        {i + 1}
-      </span>
-      <span className="whitespace-pre-wrap break-words">{parts}</span>
-    </div>
-  )
-}
 
 type View = 'grid' | 'json'
 
@@ -99,7 +63,9 @@ export function Skills() {
             <CopyButton text={skillsJson} label={`${ui.copy} ${ui.skillsFile}`} className="ml-auto" />
           </div>
           <pre tabIndex={0} aria-label={ui.skillsFile} className="flex-1 overflow-auto py-4 pr-4 font-mono text-[13px] leading-6">
-            <code>{skillsJson.split('\n').map(highlight)}</code>
+            <code>
+              <HighlightedCode code={skillsJson} numbered />
+            </code>
           </pre>
         </div>
       </div>

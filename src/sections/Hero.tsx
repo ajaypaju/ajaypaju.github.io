@@ -5,6 +5,7 @@ import { RoleTyper } from '../components/RoleTyper'
 import { heroStatus, profile } from '../data/profile'
 import { imageUrl, PHOTO_MEDIA, srcSet } from '../lib/images'
 import { useMediaQuery } from '../lib/media'
+import { useAppActions } from '../lib/appActions'
 import { usePrefersReducedMotion } from '../lib/motion'
 
 const btn =
@@ -32,12 +33,13 @@ interface Props {
 
 export function Hero({ ready }: Props) {
   const reducedMotion = usePrefersReducedMotion()
+  const { openTerminal } = useAppActions()
   // Exactly one photo is mounted, so each viewport downloads only its own image.
   const desktop = useMediaQuery(PHOTO_MEDIA)
   const { avatar } = profile.photo
 
   return (
-    <section id="hero" aria-labelledby="hero-heading" className="relative overflow-hidden">
+    <section id="hero" aria-labelledby="hero-heading" tabIndex={-1} className="relative overflow-hidden outline-none">
       <NetworkCanvas />
       <m.div
         variants={container}
@@ -115,12 +117,11 @@ export function Hero({ ready }: Props) {
           <a href="#contact" className={`${btn} border border-line bg-surface text-text hover:border-accent`}>
             {profile.ui.contact}
           </a>
-          {/* Wired to the terminal overlay in a later step. */}
           <button
             type="button"
-            disabled
-            title={profile.ui.openTerminalSoon}
-            className={`${btn} border border-line text-muted disabled:cursor-not-allowed`}
+            onClick={openTerminal}
+            aria-haspopup="dialog"
+            className={`${btn} border border-line text-text hover:border-accent`}
           >
             <span aria-hidden="true" className="mr-2 text-accent">
               &gt;_

@@ -16,7 +16,13 @@ export function Section({ id, className = '', children }: Props) {
   const headingId = `${id}-heading`
   const index = String(numbered.indexOf(id) + 1).padStart(2, '0')
   return (
-    <section id={id} aria-labelledby={headingId} className={`border-t border-line py-16 sm:py-24 ${className}`}>
+    // tabIndex -1: navigation (terminal, palette) moves focus here; not in the tab order.
+    <section
+      id={id}
+      aria-labelledby={headingId}
+      tabIndex={-1}
+      className={`border-t border-line py-16 outline-none sm:py-24 ${className}`}
+    >
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <p className="font-mono text-xs uppercase tracking-widest text-accent-2">
           <span aria-hidden="true">{index} / </span>

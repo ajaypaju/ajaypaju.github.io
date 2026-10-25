@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 const CONFIRM_MS = 2000
 
-async function writeText(text: string): Promise<boolean> {
+export async function writeText(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text)
     return true

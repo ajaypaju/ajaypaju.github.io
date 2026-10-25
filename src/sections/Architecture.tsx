@@ -81,11 +81,12 @@ export function Architecture() {
           />
         </div>
 
-        {/* min-height fits the longest detail at each width, so hovering nodes never shifts the page. */}
+        {/* min-height = the tallest detail at each breakpoint (measured: 126 px below 640 px, 104 px
+            above), so hovering nodes never shifts the page and there's no spare space. */}
         <aside
           id={PANEL_ID}
           aria-label={content.ui.detailsLabel}
-          className="min-h-[9.5rem] rounded-lg border border-line bg-surface p-4 sm:min-h-[7.5rem] md:min-h-[6.5rem]"
+          className="min-h-[126px] rounded-lg border border-line bg-surface p-4 sm:min-h-[104px]"
         >
           {node ? (
             <>

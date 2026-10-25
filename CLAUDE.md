@@ -62,7 +62,8 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
 ## Layout
 - `src/data/profile.ts` — all content + types, including `sections` (id, nav label, heading, placeholder;
   their order is page order and drives the `01 / …` labels), `capabilities`, `codeCard`, `photo`, `architecture`
-  (map nodes, details, hop labels, screen-reader flow lists) and `meta`. Metrics use `caption` in the strip.
+  (map nodes, details, hop labels, screen-reader flow lists), `terminal` (commands, help text, easter-egg
+  lines, chips), `palette` and `meta`. Metrics use `caption` in the strip.
   Derived lines (`heroStatus`, `bootLines`, `codeCardEntries`, `photoChips`) are composed there from the facts,
   never retyped.
 - `index.html` gets `<title>` and the meta description from `profile.meta` via the `profile-meta` plugin in
@@ -71,12 +72,14 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
 - `src/components/` — `Nav`, `ThemeToggle`, `Section` (shared section shell, auto-numbered), `NetworkCanvas`,
   `RoleTyper`, `HeroCutout` (hero, 1024 px+ only), `PromptTerminal` + `FlowDiagram` (Prompt → Task),
   `FlowMap` (architecture map: SVG edges/packets + HTML node buttons + animation engine), `CopyButton`,
-  `CommandPalette`, `TerminalOverlay`.
+  `CommandPalette` and `TerminalOverlay` (both code-split, default exports).
 - `src/sections/` — one component per section.
 - `src/lib/` — `theme.ts`, `storage.ts` (the only place storage is touched), `motion.ts`
   (`usePrefersReducedMotion`), `media.ts` (`useMediaQuery`), `parallax.ts` (`useHeroParallax`), `images.ts` (srcset helpers, photo sizes),
   `archLayout.ts` (map geometry per view and breakpoint), `dates.ts` (role durations, computed at runtime),
-  `clipboard.ts` (`useCopy`, with a textarea fallback), `boot.ts` (once-per-session check), `promptTimeline.ts` (the Prompt → Task
+  `clipboard.ts` (`useCopy`, with a textarea fallback), `files.ts` (generated `skills.json` and `ajay.ts`),
+  `highlight.tsx` (JSON/TS highlighting), `appActions.ts` (context: theme, open terminal/palette, goTo,
+  copy email, download CV), `navigate.ts`, `focusTrap.ts`, `lazyModule.ts` (code-split components), `boot.ts` (once-per-session check), `promptTimeline.ts` (the Prompt → Task
   timeline: one clock `t` drives terminal, diagram and controls).
 - `public/Ajay_P_CV.pdf` — the Download CV target (`profile.cvPath`).
 - `public/images/` — hero photos, used as supplied (don't re-encode): `ajay-cutout-{600,1200}.{avif,webp}`
@@ -102,6 +105,11 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
   SVG in percentages, so both scale together. Both views share one viewBox per breakpoint (no height change on
   toggle). Packets move imperatively in one rAF loop; node highlights only change opacity. Check label fit
   after `document.fonts.ready` (the fallback font is narrower than Inter).
+- Overlays (terminal, palette) are code-split with `useLazyComponent` (dynamic import, prefetched after the
+  `load` event when idle), not React.lazy: Suspense's reveal throttle added ~300 ms to the first open.
+  While one is open the page wrapper is `inert`; focus returns to the opener, or moves to the section on
+  navigation. Single-key shortcuts must check `isTypingTarget`.
+- The only console output is the DevTools greeting in `main.tsx`.
 - Keep numbers and units together with a non-breaking space (`'~300\u00a0ms'`).
 
 ## Section plan (built step by step — only build the step currently asked for)
@@ -134,14 +142,13 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
    year is left out, never guessed.
 9. **Contact (built in Step 5)** — "Get in touch": `$ ajay --contact` block (email with copy + mailto,
    LinkedIn/GitHub in new tabs with rel="noopener noreferrer", location), Email me / Download CV. No form.
-   Footer: © year · built with …, plus "View source" (`profile.links.source`).
-10. **Global** — Ctrl/Cmd+K command palette (jump to sections, download CV, copy email, toggle theme, open
-    terminal) and a full terminal-mode overlay with commands: `help`, `whoami`, `about`, `experience`,
-    `skills`, `capabilities` (alias `projects`: the 6 capabilities plus the three AI systems — MCP server,
-    Claude Code integration, AI bot users), `awards`, `contact`, `cv`, `theme`, `clear`, `exit`, plus the easter egg
-    `sudo hire-ajay` which opens a pre-filled email.
-    **Must also add `cat ajay.ts`**, printing `const ajay = { … }` from `codeCardEntries` (the old hero code
-    card). Its Prettier-style array wrapping lives in git history: `89e12dd:src/components/CodeCard.tsx`.
+   Footer: "© {year} Ajay P" only.
+10. **Global (built in Step 6)** — Ctrl/Cmd+K palette (Navigate / Actions / Links, fuzzy filter, combobox
+    + listbox) with a ⌘K / Ctrl K chip in the nav; terminal overlay (` key, hero button, palette): help,
+    whoami, about, experience, skills [--json], capabilities (alias projects), awards, contact, cv, ls,
+    cat ajay.ts | skills.json, open/cd <section>, theme [dark|light], history, clear (Ctrl+L), exit. Tab
+    completion, in-memory history, tappable chips. **Exactly two easter eggs:** `sudo hire-ajay` (pre-filled
+    mailto) and `rm -rf /`. Don't add more.
 
 ## Progress
 - [x] Step 1 — scaffold, CLAUDE.md, profile data, tokens/fonts/theme toggle, page skeleton with section stubs.
@@ -157,3 +164,5 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
   glow, floating chips, pointer parallax).
 - [x] Step 4 — metrics strip, request-flow architecture map; silhouette glow kept under reduced motion.
 - [x] Step 5 — experience, skills, awards, contact, footer; architecture details panel moved below the map.
+- [x] Step 6 — terminal mode, command palette, DevTools greeting; footer trimmed, skills merged into
+  "Architecture & Security", mobile map re-routed as a trunk with branches, map/panel trimmed.

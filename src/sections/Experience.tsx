@@ -38,7 +38,8 @@ function RoleEntry({ role, current, reducedMotion }: { role: Role; current: bool
         {role.highlights.map((h) => (
           <li key={h} className="flex gap-3 leading-relaxed text-muted">
             <span aria-hidden="true" className="mt-[0.7em] h-1 w-1 shrink-0 rounded-full bg-accent-2" />
-            <span>{h}</span>
+            {/* ~72 characters per line on desktop. */}
+            <span className="max-w-[72ch]">{h}</span>
           </li>
         ))}
       </ul>

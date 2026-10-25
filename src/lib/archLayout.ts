@@ -23,6 +23,11 @@ export interface MapLayout {
   nodes: Partial<Record<ArchNodeId, Box>>
   /** Directed edges, drawn border to border with an arrowhead. */
   edges: [ArchNodeId, ArchNodeId][]
+  /** Hand-routed connectors (e.g. a trunk with branches), so no edge passes behind a node it
+   *  doesn't connect to. */
+  paths: { points: Pt[]; arrow: boolean }[]
+  /** Waypoints a packet takes between the app servers and a data node, matching `paths`. */
+  via: Partial<Record<ArchNodeId, Pt[]>>
   /** Dashed monitoring taps: vertical lines from a server-side node down to the band. */
   taps: { x: number; y1: number; y2: number }[]
 }
@@ -31,20 +36,32 @@ export const DATA_NODES: ArchNodeId[] = ['redis', 'queue', 'mysql', 'mongo', 's3
 export const REQUEST_ROUTE: ArchNodeId[] = ['client', 'cloudflare', 'web', 'app']
 export const DEPLOY_ROUTE: ArchNodeId[] = ['git', 'ci', 'build', 'deploy', 'monitoring']
 
-const requestEdges: [ArchNodeId, ArchNodeId][] = [
+const pathEdges: [ArchNodeId, ArchNodeId][] = [
   ['client', 'cloudflare'],
   ['cloudflare', 'web'],
   ['web', 'app'],
   ['app', 'ai'],
   ['app', 'integrations'],
+]
+const requestEdges: [ArchNodeId, ArchNodeId][] = [
+  ...pathEdges,
   ...DATA_NODES.map((d): [ArchNodeId, ArchNodeId] => ['app', d]),
 ]
 const deployEdges = DEPLOY_ROUTE.slice(1).map((to, i): [ArchNodeId, ArchNodeId] => [DEPLOY_ROUTE[i], to])
 
 const box = (x: number, y: number, w: number, h: number): Box => ({ x, y, w, h })
 
-const WIDE = { width: 1000, height: 600 }
-const NARROW = { width: 360, height: 820 }
+// Heights are trimmed to the content: ~24 units of padding above the top row and below Monitoring.
+const WIDE = { width: 1000, height: 524 }
+const NARROW = { width: 360, height: 770 }
+
+// Narrow request layout: a vertical trunk down from the app servers (x = 180, between the two data
+// columns), with a short branch into each data node.
+const TRUNK_X = 180
+const ROW_1 = 485 // redis | queue
+const ROW_2 = 560 // mysql | mongo
+const LEFT_EDGE = 92 + 65 // right edge of the left column (x 92, w 130)
+const RIGHT_EDGE = 268 - 65 // left edge of the right column
 
 export const LAYOUTS: Record<ArchView, { wide: MapLayout; narrow: MapLayout }> = {
   request: {
@@ -53,24 +70,27 @@ export const LAYOUTS: Record<ArchView, { wide: MapLayout; narrow: MapLayout }> =
     wide: {
       ...WIDE,
       nodes: {
-        client: box(90, 290, 160, 60),
-        cloudflare: box(262, 290, 140, 60),
-        web: box(425, 290, 140, 60),
-        app: box(605, 290, 160, 64),
-        ai: box(525, 120, 150, 56),
-        integrations: box(705, 120, 150, 56),
-        redis: box(890, 140, 160, 52),
-        queue: box(890, 215, 160, 52),
-        mysql: box(890, 290, 160, 52),
-        mongo: box(890, 365, 160, 52),
-        s3: box(890, 440, 160, 52),
-        monitoring: box(640, 545, 600, 44),
+        client: box(90, 222, 160, 60),
+        cloudflare: box(262, 222, 140, 60),
+        web: box(425, 222, 140, 60),
+        app: box(605, 222, 160, 64),
+        ai: box(525, 52, 150, 56),
+        integrations: box(705, 52, 150, 56),
+        redis: box(890, 72, 160, 52),
+        queue: box(890, 147, 160, 52),
+        mysql: box(890, 222, 160, 52),
+        mongo: box(890, 297, 160, 52),
+        s3: box(890, 372, 160, 52),
+        monitoring: box(640, 477, 600, 44),
       },
+      // The fan from the app servers to the data column crosses no other node, so straight edges.
       edges: requestEdges,
+      paths: [],
+      via: {},
       taps: [
-        { x: 425, y1: 320, y2: 523 },
-        { x: 605, y1: 322, y2: 523 },
-        { x: 890, y1: 466, y2: 523 },
+        { x: 425, y1: 252, y2: 455 },
+        { x: 605, y1: 254, y2: 455 },
+        { x: 890, y1: 398, y2: 455 },
       ],
     },
     // Vertical: the request path down the middle, AI/integrations as a side row above the app
@@ -84,28 +104,47 @@ export const LAYOUTS: Record<ArchView, { wide: MapLayout; narrow: MapLayout }> =
         ai: box(92, 300, 150, 52),
         integrations: box(268, 300, 150, 52),
         app: box(180, 390, 240, 56),
-        redis: box(92, 485, 150, 52),
-        queue: box(268, 485, 150, 52),
-        mysql: box(92, 560, 150, 52),
-        mongo: box(268, 560, 150, 52),
+        redis: box(92, ROW_1, 130, 52),
+        queue: box(268, ROW_1, 130, 52),
+        mysql: box(92, ROW_2, 130, 52),
+        mongo: box(268, ROW_2, 130, 52),
         s3: box(180, 635, 150, 52),
-        monitoring: box(180, 735, 320, 44),
+        monitoring: box(180, 725, 320, 44),
       },
-      edges: requestEdges,
-      taps: [{ x: 180, y1: 661, y2: 713 }],
+      edges: pathEdges,
+      paths: [
+        // Trunk from the app servers' bottom edge into AWS S3.
+        { points: [{ x: TRUNK_X, y: 418 }, { x: TRUNK_X, y: 607 }], arrow: true },
+        // Branches off the trunk into each data node's inner side.
+        { points: [{ x: TRUNK_X, y: ROW_1 }, { x: LEFT_EDGE + 2, y: ROW_1 }], arrow: true },
+        { points: [{ x: TRUNK_X, y: ROW_1 }, { x: RIGHT_EDGE - 2, y: ROW_1 }], arrow: true },
+        { points: [{ x: TRUNK_X, y: ROW_2 }, { x: LEFT_EDGE + 2, y: ROW_2 }], arrow: true },
+        { points: [{ x: TRUNK_X, y: ROW_2 }, { x: RIGHT_EDGE - 2, y: ROW_2 }], arrow: true },
+      ],
+      via: {
+        redis: [{ x: TRUNK_X, y: ROW_1 }],
+        queue: [{ x: TRUNK_X, y: ROW_1 }],
+        mysql: [{ x: TRUNK_X, y: ROW_2 }],
+        mongo: [{ x: TRUNK_X, y: ROW_2 }],
+      },
+      taps: [{ x: 180, y1: 661, y2: 703 }],
     },
   },
   deploy: {
     wide: {
       ...WIDE,
-      nodes: Object.fromEntries(DEPLOY_ROUTE.map((id, i) => [id, box(100 + i * 200, 300, 170, 64)])),
+      nodes: Object.fromEntries(DEPLOY_ROUTE.map((id, i) => [id, box(100 + i * 200, WIDE.height / 2, 170, 64)])),
       edges: deployEdges,
+      paths: [],
+      via: {},
       taps: [],
     },
     narrow: {
       ...NARROW,
-      nodes: Object.fromEntries(DEPLOY_ROUTE.map((id, i) => [id, box(180, 90 + i * 160, 240, 60)])),
+      nodes: Object.fromEntries(DEPLOY_ROUTE.map((id, i) => [id, box(180, 85 + i * 150, 240, 60)])),
       edges: deployEdges,
+      paths: [],
+      via: {},
       taps: [],
     },
   },

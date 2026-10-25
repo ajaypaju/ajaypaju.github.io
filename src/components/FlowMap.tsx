@@ -74,7 +74,12 @@ export function FlowMap({ view, wide, reducedMotion, selected, onPreview, onSele
   const traceIds = [...REQUEST_ROUTE, TRACE_DATA]
   const tracingHere = tracing && view === 'request'
   // The traced route, and under reduced motion every hop label at once, derive from `tracing`.
-  const traceRoute = tracingHere ? traceIds.map((id) => nodeBox(id)) : null
+  const routeTo = (data: ArchNodeId): Pt[] => [
+    ...REQUEST_ROUTE.map((id) => nodeBox(id)),
+    ...(layout.via[data] ?? []),
+    nodeBox(data),
+  ]
+  const traceRoute = tracingHere ? routeTo(TRACE_DATA) : null
   const shownHops: Hop[] =
     reducedMotion && tracingHere
       ? [...traceIds.slice(1).map((id, i) => ({ id, text: TRACE_LABELS[i] })), { id: 'client', text: HOPS.response }]
@@ -205,10 +210,16 @@ export function FlowMap({ view, wide, reducedMotion, selected, onPreview, onSele
     } else if (tracing) {
       const route = [...REQUEST_ROUTE, TRACE_DATA]
       const traceRoutePts = route.map(center)
+      // Waypoints (the narrow layout's trunk) belong to the last hop, app servers → data node.
+      const via = L.via[TRACE_DATA] ?? []
       const forward: Phase[] = route.slice(1).flatMap((id, i): Phase[] => [
         {
           dur: TRACE_HOP,
-          pos: (p) => along([traceRoutePts[i], traceRoutePts[i + 1]], easeInOut(p)),
+          pos: (p) =>
+            along(
+              i === route.length - 2 ? [traceRoutePts[i], ...via, traceRoutePts[i + 1]] : [traceRoutePts[i], traceRoutePts[i + 1]],
+              easeInOut(p),
+            ),
           color: 'cyan',
           onEnd: () => {
             flash(id)
@@ -217,7 +228,7 @@ export function FlowMap({ view, wide, reducedMotion, selected, onPreview, onSele
         },
         { dur: TRACE_HOLD, pos: () => traceRoutePts[i + 1], color: 'cyan' },
       ])
-      const back = [...traceRoutePts].reverse()
+      const back = [...traceRoutePts.slice(0, -1), ...via, traceRoutePts[traceRoutePts.length - 1]].reverse()
       runPhases(
         [
           ...forward,
@@ -250,7 +261,7 @@ export function FlowMap({ view, wide, reducedMotion, selected, onPreview, onSele
             const choices = DATA_NODES.filter((d) => d !== lastData)
             const data = choices[Math.floor(Math.random() * choices.length)]
             lastData = data
-            slots[free] = { start: now, data, hit: false, path: [...REQUEST_ROUTE, data].map(center) }
+            slots[free] = { start: now, data, hit: false, path: [...REQUEST_ROUTE.map(center), ...(L.via[data] ?? []), center(data)] }
             lastSpawn = now
           }
         }
@@ -312,6 +323,17 @@ export function FlowMap({ view, wide, reducedMotion, selected, onPreview, onSele
             />
           )
         })}
+        {layout.paths.map((path, i) => (
+          <polyline
+            key={i}
+            points={path.points.map((p) => `${p.x},${p.y}`).join(' ')}
+            fill="none"
+            className="stroke-line"
+            strokeWidth={1.5}
+            vectorEffect="non-scaling-stroke"
+            markerEnd={path.arrow ? 'url(#arch-arrow)' : undefined}
+          />
+        ))}
         {layout.taps.map((tap) => (
           <line
             key={tap.x}
