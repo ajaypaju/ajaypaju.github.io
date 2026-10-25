@@ -70,12 +70,13 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
   cutout preload (AVIF, `media="(min-width: 1024px)"`), built from `profile.photo.cutout` with `lib/images.ts`.
 - `src/components/` — `Nav`, `ThemeToggle`, `Section` (shared section shell, auto-numbered), `NetworkCanvas`,
   `RoleTyper`, `HeroCutout` (hero, 1024 px+ only), `PromptTerminal` + `FlowDiagram` (Prompt → Task),
-  `FlowMap` (architecture map: SVG edges/packets + HTML node buttons + animation engine),
+  `FlowMap` (architecture map: SVG edges/packets + HTML node buttons + animation engine), `CopyButton`,
   `CommandPalette`, `TerminalOverlay`.
 - `src/sections/` — one component per section.
 - `src/lib/` — `theme.ts`, `storage.ts` (the only place storage is touched), `motion.ts`
   (`usePrefersReducedMotion`), `media.ts` (`useMediaQuery`), `parallax.ts` (`useHeroParallax`), `images.ts` (srcset helpers, photo sizes),
-  `archLayout.ts` (map geometry per view and breakpoint), `boot.ts` (once-per-session check), `promptTimeline.ts` (the Prompt → Task
+  `archLayout.ts` (map geometry per view and breakpoint), `dates.ts` (role durations, computed at runtime),
+  `clipboard.ts` (`useCopy`, with a textarea fallback), `boot.ts` (once-per-session check), `promptTimeline.ts` (the Prompt → Task
   timeline: one clock `t` drives terminal, diagram and controls).
 - `public/Ajay_P_CV.pdf` — the Download CV target (`profile.cvPath`).
 - `public/images/` — hero photos, used as supplied (don't re-encode): `ajay-cutout-{600,1200}.{avif,webp}`
@@ -124,10 +125,16 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
 5. **Architecture map (built in Step 4)** — "How a request flows": Request flow / Deploy flow toggle, ambient
    packets (~1 request / 2 s, varied data node), "Trace a request" with hop labels, deploy stages with checks,
    details panel (hover / focus previews, click pins). Generic only — no confidential internals.
-6. **Experience timeline.**
-7. **Skills** — grouped grid with a "view as JSON" toggle showing the same data as syntax-highlighted JSON.
-8. **Awards and education.**
-9. **Contact** — terminal-styled block with copy-email-to-clipboard and links.
+6. **Experience timeline (built in Step 5)** — company header, roles newest first with runtime durations
+   (inclusive months, e.g. "7 mos"), "Promoted to Technical Lead" marker, bullets + `tags` per role.
+7. **Skills (built in Step 5)** — group cards (3 / 2 / 1 columns) with a Grid / JSON toggle; skills.json is
+   generated from `profile.skills`. Both views share one grid cell (the grid sets the height), the hidden one
+   is `inert`. No proficiency bars, percentages or ratings — ever.
+8. **Awards and education (built in Step 5)** — `awards` are `{ title, year?, note?, highlight? }`; a missing
+   year is left out, never guessed.
+9. **Contact (built in Step 5)** — "Get in touch": `$ ajay --contact` block (email with copy + mailto,
+   LinkedIn/GitHub in new tabs with rel="noopener noreferrer", location), Email me / Download CV. No form.
+   Footer: © year · built with …, plus "View source" (`profile.links.source`).
 10. **Global** — Ctrl/Cmd+K command palette (jump to sections, download CV, copy email, toggle theme, open
     terminal) and a full terminal-mode overlay with commands: `help`, `whoami`, `about`, `experience`,
     `skills`, `capabilities` (alias `projects`: the 6 capabilities plus the three AI systems — MCP server,
@@ -149,3 +156,4 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
 - [x] Step 3.7 — cleaner cutout (v2), stack chip + new status line, hero depth (silhouette glow, breathing
   glow, floating chips, pointer parallax).
 - [x] Step 4 — metrics strip, request-flow architecture map; silhouette glow kept under reduced motion.
+- [x] Step 5 — experience, skills, awards, contact, footer; architecture details panel moved below the map.

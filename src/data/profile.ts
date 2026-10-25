@@ -44,15 +44,31 @@ export interface Metric {
 
 export interface Role {
   title: string
+  /** "Mon YYYY"; durations are computed from these at runtime. */
   start: string
+  /** "Mon YYYY" or "Present". */
   end: string
   highlights: string[]
+  /** Tech tags shown under the bullets, drawn from them. */
+  tags: string[]
 }
 
 export interface Company {
   name: string
   location: string
+  /** Newest role first. */
   roles: Role[]
+  /** Marker shown on the timeline between the two roles. */
+  promotion?: string
+}
+
+export interface Award {
+  title: string
+  /** Omitted when not known; never guessed. */
+  year?: string
+  note?: string
+  /** Subtle mint highlight. */
+  highlight?: boolean
 }
 
 export interface SkillGroup {
@@ -195,6 +211,8 @@ export interface Profile {
   links: {
     linkedin: Link
     github: Link
+    /** This site's source code. */
+    source: Link
   }
   /** Path under public/. */
   cvPath: string
@@ -208,7 +226,7 @@ export interface Profile {
   photo: Photo
   promptToTask: PromptToTask
   architecture: Architecture
-  awards: string[]
+  awards: Award[]
   education: Education[]
   sections: SectionMeta[]
   /** Interface micro-copy. */
@@ -228,6 +246,17 @@ export interface Profile {
     leadingEngineering: string
     bootHost: string
     bootSkipHint: string
+    skillsViewLabel: string
+    skillsGrid: string
+    skillsJson: string
+    skillsFile: string
+    copy: string
+    copied: string
+    copyFailed: string
+    contactCommand: string
+    emailMe: string
+    currentRole: string
+    footerBuiltWith: string
   }
 }
 
@@ -328,7 +357,7 @@ const architecture: Architecture = {
       detail: 'Stripe, Razorpay, webhooks, OAuth2 SSO, email/SMS.',
     },
     monitoring: { label: 'Monitoring', detail: 'Monitoring and incident resolution for production.' },
-    git: { label: 'git push', detail: CI_DETAIL },
+    git: { label: 'git push', detail: 'Code pushed to GitLab triggers the CI/CD pipeline.' },
     ci: { label: 'GitLab CI/CD', detail: CI_DETAIL },
     build: { label: 'Build', detail: CI_DETAIL },
     deploy: { label: 'Deploy', sub: 'EC2 · on-premise', detail: CI_DETAIL },
@@ -386,6 +415,7 @@ export const profile: Profile = {
   links: {
     linkedin: { label: 'LinkedIn', href: 'https://linkedin.com/in/ajaypofficial' },
     github: { label: 'GitHub', href: 'https://github.com/ajaypaju' },
+    source: { label: 'View source', href: 'https://github.com/ajaypaju/ajaypaju.github.io' },
   },
   cvPath: '/Ajay_P_CV.pdf',
 
@@ -417,6 +447,7 @@ export const profile: Profile = {
             'Manage production servers and infrastructure on AWS (EC2, RDS, S3) and Cloudflare: request flow and traffic routing, web servers, Docker, monitoring and deployment workflows, including on-premise deployments.',
             'Mentor junior developers, review pull requests, set engineering standards, coordinate releases with Product and QA.',
           ],
+          tags: ['AWS', 'Cloudflare', 'Docker', 'MCP', 'Claude Code', 'LLM APIs', 'Laravel', 'Node.js'],
         },
         {
           title: 'Software Engineer',
@@ -430,8 +461,10 @@ export const profile: Profile = {
             'Implemented RBAC with Laravel policies and middleware; built queue-based background jobs and data-aggregation pipelines.',
             'Shipped features through CI/CD workflows, code reviews and release support.',
           ],
+          tags: ['PHP', 'Laravel', 'MySQL', 'MongoDB', 'Redis', 'Stripe', 'Razorpay', 'OAuth2'],
         },
       ],
+      promotion: 'Promoted to Technical Lead',
     },
   ],
 
@@ -516,9 +549,9 @@ export const profile: Profile = {
   },
 
   awards: [
-    'Winner, company-wide AI Prompt Engineering Challenge',
-    'Best R&D Team Performer (2023–2025), SaaS platform',
-    'Best Programmer Award (2022)',
+    { title: 'Winner, company-wide AI Prompt Engineering Challenge', highlight: true },
+    { title: 'Best R&D Team Performer', year: '2023–2025', note: 'SaaS platform' },
+    { title: 'Best Programmer Award', year: '2022' },
   ],
 
   education: [
@@ -581,7 +614,7 @@ export const profile: Profile = {
     {
       id: 'contact',
       navLabel: 'Contact',
-      heading: 'Contact',
+      heading: 'Get in touch',
       placeholder: 'Terminal-styled contact block goes here.',
     },
   ],
@@ -601,6 +634,17 @@ export const profile: Profile = {
     leadingEngineering: 'leading engineering for a platform serving',
     bootHost: 'ajay.dev',
     bootSkipHint: 'press any key to skip',
+    skillsViewLabel: 'Skills view',
+    skillsGrid: 'Grid',
+    skillsJson: 'JSON',
+    skillsFile: 'skills.json',
+    copy: 'copy',
+    copied: 'Copied',
+    copyFailed: 'Failed',
+    contactCommand: 'ajay --contact',
+    emailMe: 'Email me',
+    currentRole: 'current',
+    footerBuiltWith: 'Built with React, TypeScript and Claude Code',
   },
 }
 

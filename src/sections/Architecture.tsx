@@ -65,7 +65,8 @@ export function Architecture() {
         </button>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
+      {/* The map takes the full content width; the details panel sits below it at every size. */}
+      <div className="mt-6 grid gap-4">
         <div className="rounded-lg border border-line bg-surface/40 p-3 sm:p-5">
           <FlowMap
             view={view}
@@ -80,11 +81,11 @@ export function Architecture() {
           />
         </div>
 
-        {/* min-height fits the longest detail, so changing nodes doesn't shift the page. */}
+        {/* min-height fits the longest detail at each width, so hovering nodes never shifts the page. */}
         <aside
           id={PANEL_ID}
           aria-label={content.ui.detailsLabel}
-          className="min-h-[9.5rem] rounded-lg border border-line bg-surface p-4 lg:self-start"
+          className="min-h-[9.5rem] rounded-lg border border-line bg-surface p-4 sm:min-h-[7.5rem] md:min-h-[6.5rem]"
         >
           {node ? (
             <>

@@ -46,9 +46,19 @@ export default function App() {
         <Contact />
       </main>
       <footer className="border-t border-line py-8">
-        <p className="mx-auto max-w-5xl px-4 font-mono text-xs text-muted sm:px-6">
-          © {year} {profile.name} · {profile.location}
-        </p>
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 font-mono text-xs text-muted sm:px-6">
+          <p>
+            © {year} {profile.name} · {profile.ui.footerBuiltWith}
+          </p>
+          <a
+            href={profile.links.source.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted underline-offset-4 transition-colors hover:text-text hover:underline"
+          >
+            {profile.links.source.label}
+          </a>
+        </div>
       </footer>
       <CommandPalette />
       <TerminalOverlay />
