@@ -6,22 +6,9 @@
     <title>%PROFILE_TITLE%</title>
     <meta name="description" content="%PROFILE_DESCRIPTION%" />
     <meta name="color-scheme" content="dark light" />
+    <!-- Canonical, theme-color, icons, Open Graph / Twitter, JSON-LD and the font preload are injected
+         from src/data/profile.ts by the profile-head plugin in vite.config.ts. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Fonts load without blocking first paint; system fallbacks show until they swap in. -->
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      />
-    </noscript>
     <script>
       // Apply the saved theme before first paint to avoid a flash. Dark is the default.
       try {

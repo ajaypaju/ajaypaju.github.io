@@ -1,0 +1,57 @@
+# Builds the site on every push to main and deploys dist/ to GitHub Pages.
+# Repository setting required: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: read the repo, write to Pages, and mint the OIDC token deploy-pages needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a newer push cancels a queued (not yet running) one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - run: npm ci
+
+      # tsc -b (zero TypeScript errors) + vite build. public/404.html is copied into dist/.
+      - run: npm run build
+
+      - name: Check the build output
+        run: |
+          test -f dist/404.html
+          if grep -rli desklog dist/ --exclude=Ajay_P_CV.pdf; then echo "Product name found in dist/"; exit 1; fi
+          if grep -rlE '88486|56394' dist/; then echo "Phone number found in dist/"; exit 1; fi
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

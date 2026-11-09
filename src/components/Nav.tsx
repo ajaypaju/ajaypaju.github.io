@@ -41,10 +41,11 @@ export function Nav({ theme, onToggleTheme }: Props) {
           type="button"
           onClick={openPalette}
           aria-haspopup="dialog"
-          aria-label={`${profile.palette.open} (${shortcut})`}
           className="hidden h-9 shrink-0 items-center rounded-md border border-line bg-surface px-2.5 font-mono text-xs text-muted transition-colors hover:border-accent hover:text-text md:inline-flex"
         >
+          {/* The visible shortcut starts the accessible name ("⌘K, open command palette"). */}
           <kbd className="font-mono">{shortcut}</kbd>
+          <span className="sr-only">, {profile.palette.open.toLowerCase()}</span>
         </button>
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
       </nav>

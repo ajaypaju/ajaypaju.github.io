@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 · Ajay P</title>
+    <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      // Follow the theme saved by the site; dark otherwise.
+      try {
+        var t = localStorage.getItem('theme')
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
+      } catch (e) {}
+    </script>
+    <style>
+      /* Self-contained: the site's tokens, no external CSS, fonts or JS bundle. */
+      :root, [data-theme='dark'] {
+        --bg: #0a0b0d; --surface: #121419; --line: #1f232b; --text: #e6e8eb; --muted: #8a93a3;
+        --accent: #7cffb2; --accent-2: #5cc8ff; --on-accent: #0a0b0d; color-scheme: dark;
+      }
+      [data-theme='light'] {
+        --bg: #f7f8fa; --surface: #ffffff; --line: #dde1e7; --text: #0f1115; --muted: #586170;
+        --accent: #047857; --accent-2: #0369a1; --on-accent: #ffffff; color-scheme: light;
+      }
+      * { box-sizing: border-box; margin: 0; }
+      body {
+        min-height: 100vh; display: grid; place-items: center; padding: 16px;
+        background: var(--bg); color: var(--text);
+        font: 14px/1.7 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      main { width: 100%; max-width: 640px; }
+      .window { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden; }
+      .bar { display: flex; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+      .bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+      .body { padding: 20px 16px; overflow-wrap: anywhere; }
+      .prompt { color: var(--accent); }
+      .err { color: var(--muted); }
+      .code { margin-top: 20px; color: var(--accent-2); font-size: 12px; letter-spacing: 0.08em; }
+      a {
+        display: inline-flex; align-items: center; margin-top: 20px; height: 44px; padding: 0 20px;
+        border-radius: 6px; background: var(--accent); color: var(--on-accent); text-decoration: none;
+      }
+      a:hover { opacity: 0.9; }
+      a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="window">
+        <div class="bar" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="body">
+          <p><span class="prompt">$</span> cd <span id="path">/</span></p>
+          <p class="err">bash: cd: no such file or directory</p>
+          <p class="code">404 · PAGE NOT FOUND</p>
+        </div>
+      </div>
+      <a href="/">Back to home</a>
+    </main>
+    <script>
+      // textContent, never innerHTML: the path comes from the URL.
+      var raw = location.pathname + location.search
+      try {
+        raw = decodeURIComponent(raw)
+      } catch (e) {}
+      document.getElementById('path').textContent = raw
+    </script>
+  </body>
+</html>

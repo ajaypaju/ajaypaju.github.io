@@ -62,7 +62,9 @@ function Edge({ progress, status, first }: { progress: number; status: StepStatu
 }
 
 const CARD: Record<StepStatus, string> = {
-  upcoming: 'border-line opacity-50',
+  // Upcoming steps are quieter through color, not opacity: dimming the whole card dropped its text
+  // below 4.5:1. Muted text on the surface stays above it in both themes.
+  upcoming: 'border-dashed border-line',
   active: 'border-accent shadow-[0_0_28px_-6px_var(--color-accent)]',
   done: 'border-line',
 }
@@ -94,8 +96,10 @@ export function FlowDiagram({ steps, timeline, t }: Props) {
               </span>
               <div className="min-w-0 flex-1">
                 <p className="flex items-baseline gap-2">
-                  <span className="font-mono text-[11px] text-accent-2">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="text-sm font-semibold">{step.node}</span>
+                  <span className={`font-mono text-[11px] ${status === 'upcoming' ? 'text-muted' : 'text-accent-2'}`}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className={`text-sm font-semibold ${status === 'upcoming' ? 'text-muted' : ''}`}>{step.node}</span>
                 </p>
                 <p className="text-sm text-muted">{step.caption}</p>
               </div>

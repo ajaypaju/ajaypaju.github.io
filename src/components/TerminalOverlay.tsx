@@ -40,10 +40,13 @@ const commonPrefix = (words: string[]) =>
 const findSection = (arg: string): SectionId | undefined =>
   profile.sections.find((s) => s.id === arg.toLowerCase() || s.navLabel.toLowerCase() === arg.toLowerCase())?.id
 
+// Links in output get a 24px minimum target height (WCAG 2.5.8).
+const LINK = 'inline-flex min-h-6 items-center break-all text-accent underline-offset-4 hover:underline'
+
 const Muted = ({ children }: { children: ReactNode }) => <span className="text-muted">{children}</span>
 const Key = ({ children }: { children: ReactNode }) => <span className="text-accent-2">{children}</span>
 const ExtLink = ({ href, children }: { href: string; children: ReactNode }) => (
-  <a href={href} target="_blank" rel="noopener noreferrer" className="text-accent underline-offset-4 hover:underline">
+  <a href={href} target="_blank" rel="noopener noreferrer" className={LINK}>
     {children}
   </a>
 )
@@ -203,7 +206,7 @@ export default function TerminalOverlay({ onClose }: Props) {
         return print(
           <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4">
             <Muted>email</Muted>
-            <a href={`mailto:${profile.email}`} className="break-words text-accent underline-offset-4 hover:underline">
+            <a href={`mailto:${profile.email}`} className={LINK}>
               {profile.email}
             </a>
             <Muted>linkedin</Muted>
@@ -355,10 +358,11 @@ export default function TerminalOverlay({ onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            aria-label={T.close}
             className="ml-auto rounded border border-line px-2 py-0.5 font-mono text-[11px] text-muted transition-colors hover:border-accent hover:text-text"
           >
-            esc ✕
+            {/* Visible "esc" starts the accessible name: "esc (close terminal)". */}
+            esc<span aria-hidden="true"> ✕</span>
+            <span className="sr-only"> ({T.close})</span>
           </button>
         </div>
 

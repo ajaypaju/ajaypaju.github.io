@@ -87,7 +87,8 @@ export function HeroCutout({ variants }: Props) {
         <div ref={layer('chips')} className="pointer-events-none absolute inset-0">
           <div className="absolute -right-4 top-[41%]">
             <p
-              className={`${glass} whitespace-nowrap rounded-md px-2.5 py-1 font-mono text-[11px] text-muted motion-safe:animate-float-a`}
+              // Full text color: muted text on glass over the photo fell below 4.5:1 in the light theme.
+              className={`${glass} whitespace-nowrap rounded-md px-2.5 py-1 font-mono text-[11px] text-text motion-safe:animate-float-a`}
             >
               {photoChips.stats}
             </p>
