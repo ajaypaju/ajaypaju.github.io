@@ -396,7 +396,7 @@ const architecture: Architecture = {
       detail: 'Browsers, mobile apps and API clients from 500+ organizations.',
     },
     cloudflare: { label: 'Cloudflare', sub: 'edge', detail: 'Request flow and traffic routing at the edge.' },
-    web: { label: 'Web server', detail: 'Configure and run the web servers in front of the application.' },
+    web: { label: 'Nginx', detail: 'Configure and harden Nginx: version hiding and blocked access to configuration files.' },
     app: {
       label: 'App servers',
       sub: 'AWS EC2',
@@ -557,7 +557,7 @@ export const profile: Profile = {
   cvPath: '/Ajay_P_CV.pdf',
 
   summary:
-    'Technical Lead with 5+ years designing, building and running production systems, including a multi-tenant SaaS platform used by 500+ organizations. I own architecture, cloud infrastructure on AWS and Cloudflare, and production reliability, and lead AI integration and automation.',
+    'Technical Lead with 5+ years designing, building and running production systems, including a multi-tenant SaaS platform used by 500+ organizations. I own architecture, cloud infrastructure on AWS and Cloudflare, application security and production reliability, and lead AI integration and automation.',
 
   metrics: [
     { id: 'organizations', value: '500+', label: 'organizations', caption: 'organizations served' },
@@ -581,10 +581,11 @@ export const profile: Profile = {
             'Connected Claude Code to the platform so a plain-language prompt creates tasks automatically.',
             'Introduced AI bot users: agent accounts that are assigned tasks like any team member and carry out automated work.',
             'Built LLM-powered chat workflows for in-product help and assisted automation.',
-            'Manage production servers and infrastructure on AWS (EC2, RDS, S3) and Cloudflare: request flow and traffic routing, web servers, Docker, monitoring and deployment workflows, including on-premise deployments.',
+            'Manage production servers and infrastructure on AWS (EC2, RDS, S3) and Cloudflare: request flow and traffic routing, Nginx, Docker, monitoring and deployment workflows, including on-premise deployments.',
+            'Led remediation of every finding from an enterprise client’s OWASP-based penetration test, including high-severity issues: login rate limiting, session and cache controls, secure cookies, formula injection in data exports, open redirects, error disclosure and Nginx hardening.',
             'Mentor junior developers, review pull requests, set engineering standards, coordinate releases with Product and QA.',
           ],
-          tags: ['AWS', 'Cloudflare', 'Docker', 'MCP', 'Claude Code', 'LLM APIs', 'Laravel', 'Node.js'],
+          tags: ['AWS', 'Cloudflare', 'Nginx', 'Docker', 'OWASP', 'MCP', 'Claude Code', 'LLM APIs', 'Laravel', 'Node.js'],
         },
         {
           title: 'Software Engineer',
@@ -621,7 +622,7 @@ export const profile: Profile = {
         'AWS (EC2, S3, RDS)',
         'Cloudflare',
         'Server management',
-        'Web servers',
+        'Nginx',
         'Docker',
         'GitLab CI/CD',
         'GitHub',
@@ -632,7 +633,18 @@ export const profile: Profile = {
     { group: 'Databases', items: ['MySQL', 'MongoDB', 'Redis'] },
     {
       group: 'Architecture & Security',
-      items: ['Multi-tenant SaaS', 'Caching', 'Webhooks', 'System design', 'OAuth2 SSO', 'RBAC'],
+      items: [
+        'Multi-tenant SaaS',
+        'Caching',
+        'Webhooks',
+        'System design',
+        'OAuth2 SSO',
+        'RBAC',
+        'OWASP Top 10',
+        'VAPT remediation',
+        'Rate limiting',
+        'Security headers',
+      ],
     },
   ],
 
@@ -655,9 +667,9 @@ export const profile: Profile = {
       description: 'REST APIs and frontend modules with Laravel, Node.js and NestJS.',
     },
     {
-      title: 'Performance & Reliability',
+      title: 'Security & Reliability',
       description:
-        'Cut reporting API latency from ~900\u00a0ms to ~300\u00a0ms with MySQL optimization and Redis caching; lead incident resolution.',
+        'Led remediation of an OWASP-based penetration test: rate limiting, session and cache controls, secure cookies and Nginx hardening. Production monitoring and incident resolution.',
     },
     {
       title: 'Cloud & DevOps',
