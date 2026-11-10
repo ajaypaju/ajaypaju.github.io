@@ -7,13 +7,35 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
 ## Positioning (applies to every step)
 - This is a Technical Lead portfolio, **not a showcase of the employer's product**. Ajay is a Technical Lead
   who builds scalable systems and AI automation; the SaaS platform is proof, not the label.
-- **Never show the product name "Desklog" / "Desklog.io"** anywhere visible: hero, status line, boot sequence,
-  metrics, section text, terminal output, page title, meta tags. Say "the platform" or
-  "a multi-tenant SaaS platform" instead.
+- **Never show the employer's product name** anywhere visible: hero, status line, boot sequence, metrics,
+  section text, terminal output, page title, meta tags. Say "the platform" or "a multi-tenant SaaS
+  platform" instead.
 - The employer, **Infinite Open Source Solutions LLP**, appears **only in the Experience section**.
 - **Keep every real number and achievement** (500+ organizations, 5+ years, ~900 ms → ~300 ms, 60%, the MCP
   server, Claude Code integration, AI bot users, awards). Only the product name goes.
-- Check before every commit: `grep -rli desklog dist/` must find nothing (the CV PDF is exempt).
+
+## Blocked terms (applies to every step)
+- **No client names, product name or phone number anywhere**: not on the site, in the terminal, in
+  metadata, in the CV, in any tracked file, in commit messages or in command output.
+- The pattern (an extended regex, matched case-insensitively) lives only in `.blocked-terms` in the project
+  root, which is git-ignored and never committed. CI reads the same pattern from the `BLOCKED_TERMS`
+  GitHub Actions secret. Never type the terms themselves into any file; always read them from the file.
+- Before every commit, all of these must find nothing:
+  ```sh
+  grep -rIliE -f .blocked-terms dist/          # text files in the build
+  git grep -IliE -f .blocked-terms             # tracked files
+  git log origin/main..HEAD -p | grep '^+' | grep -ciE -f .blocked-terms   # lines added by unpushed commits
+  # and the extracted text of every PDF (dist/ and tracked), e.g. pdftotext file.pdf - | grep -iE -f .blocked-terms
+  ```
+- The deploy workflow runs the same check on `dist/` (text files and PDF text) and fails if the secret is
+  empty, so the check can never be skipped silently. It prints only file names, never the pattern or matches.
+
+## Security work (applies to every step)
+- Describe application security work **only in general terms** (e.g. "OWASP-based penetration test",
+  "rate limiting", "Nginx hardening").
+- **Never mention** client names, penetration test reports, URLs, IP addresses, server paths, endpoint
+  names, CVE numbers or counts of findings — on the site, in the terminal, in metadata, in the CV.
+  See "Blocked terms" for the check.
 
 ## Stack (fixed — do not change without asking)
 - Vite + React + TypeScript (`strict: true`), Tailwind CSS v4 (`@tailwindcss/vite`), Framer Motion.
@@ -76,7 +98,8 @@ Recruiters must understand the value in 10 seconds; engineers should find depth 
   `node scripts/generate-assets.mjs` (Playwright in a temp folder; never a project dependency). Rerun it
   after changing the name, title or `meta.ogTagline`.
 - `.github/workflows/deploy.yml` — builds on push to `main` and deploys `dist/` to GitHub Pages; it also
-  fails the build if "Desklog" or the phone number appears in `dist/`. `base` is `/`.
+  fails the build if any blocked term (the `BLOCKED_TERMS` secret) appears in `dist/` or a PDF's text, or if
+  the secret is missing. `base` is `/`.
 - `src/components/` — `Nav`, `ThemeToggle`, `Section` (shared section shell, auto-numbered), `NetworkCanvas`,
   `RoleTyper`, `HeroCutout` (hero, 1024 px+ only), `PromptTerminal` + `FlowDiagram` (Prompt → Task),
   `FlowMap` (architecture map: SVG edges/packets + HTML node buttons + animation engine), `CopyButton`,

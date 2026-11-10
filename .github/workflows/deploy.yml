@@ -1,5 +1,8 @@
 # Builds the site on every push to main and deploys dist/ to GitHub Pages.
-# Repository setting required: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+# Repository settings required:
+#   - Settings → Pages → Build and deployment → Source: "GitHub Actions".
+#   - Settings → Secrets and variables → Actions → secret BLOCKED_TERMS: an extended regex of terms that
+#     must never be published (matched case-insensitively). The build fails if it is missing.
 name: Deploy to GitHub Pages
 
 on:
@@ -34,11 +37,38 @@ jobs:
       # tsc -b (zero TypeScript errors) + vite build. public/404.html is copied into dist/.
       - run: npm run build
 
-      - name: Check the build output
+      - name: Install pdftotext
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+
+      # Fails the build if any blocked term appears in a text file in dist/ or in the text of a PDF.
+      # Prints only file names: never the pattern or the matched text.
+      - name: Check for blocked terms
+        env:
+          BLOCKED_TERMS: ${{ secrets.BLOCKED_TERMS }}
         run: |
+          set -euo pipefail
           test -f dist/404.html
-          if grep -rli desklog dist/ --exclude=Ajay_P_CV.pdf; then echo "Product name found in dist/"; exit 1; fi
-          if grep -rlE '88486|56394' dist/; then echo "Phone number found in dist/"; exit 1; fi
+          if [ -z "${BLOCKED_TERMS:-}" ]; then
+            echo "::error::The BLOCKED_TERMS secret is missing or empty; refusing to deploy without the check."
+            exit 1
+          fi
+          found=0
+          # Text files (binary files are skipped by -I); -l lists matching file names only.
+          while IFS= read -r file; do
+            echo "::error file=$file::Blocked term found in $file"
+            found=1
+          done < <(grep -rIliE -e "$BLOCKED_TERMS" dist/ || true)
+          # PDFs: check their extracted text. Captured first: piping into grep -q under pipefail can turn
+          # a match into a failure (grep exits early and pdftotext dies of SIGPIPE).
+          while IFS= read -r -d '' pdf; do
+            text=$(pdftotext -q "$pdf" - || true)
+            if grep -qiE -e "$BLOCKED_TERMS" <<<"$text"; then
+              echo "::error file=$pdf::Blocked term found in the text of $pdf"
+              found=1
+            fi
+          done < <(find dist -type f -iname '*.pdf' -print0)
+          if [ "$found" -ne 0 ]; then exit 1; fi
+          echo "No blocked terms in dist/."
 
       - uses: actions/configure-pages@v6
 

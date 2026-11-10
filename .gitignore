@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local blocked-term pattern for pre-commit checks (never committed; CI uses the BLOCKED_TERMS secret).
+.blocked-terms
